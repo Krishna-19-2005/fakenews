@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Fake News Detector</h1>
+        <p>Paste the text of the news article or URL below:</p>
+
+        <textarea id="newsInput" placeholder="Paste article text or URL here..."></textarea>
+        <button id="checkBtn">Check News</button>
+
+        <div id="result">
+            <p id="resultMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('checkBtn').addEventListener('click', function() {
+            const newsText = document.getElementById('newsInput').value;
+
+            // Send the text to Flask backend for fake news detection
+            fetch('/detect_fake_news', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ news_content: newsText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultMessage = document.getElementById('resultMessage');
+                if (data.is_fake) {
+                    resultMessage.innerText = "This news is likely fake!";
+                } else {
+                    resultMessage.innerText = "This news is likely true.";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
