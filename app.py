@@ -1,48 +1,72 @@
-from flask import Flask, request, jsonify
-from transformers import pipeline
-import re
+from flask import Flask, render_template, request, jsonify
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 import string
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
 
-# Initialize Flask app
+# Initialize the Flask app
 app = Flask(__name__)
 
-# Initialize the text-classification pipeline
-pipe = pipeline("text-classification", model="mrm8488/bert-tiny-finetuned-fake-news-detection")
+# Load and preprocess the dataset
+dataset = pd.read_csv(r"C:\Users\klpna\Downloads\archive\news_dataset.csv")
+en_data = dataset[["label"]]
+ohe = OneHotEncoder(drop="first")
+ar = ohe.fit_transform(en_data).toarray()
+dataset["label"] = pd.DataFrame(ar, columns=[['label_FAKE']])
 
 # Preprocessing function
+stop_words = set(stopwords.words('english'))
+lemmatizer = WordNetLemmatizer()
+
 def preprocess_text(text):
-    # Convert text to lowercase
-    text = text.lower()
+    text = text.lower()  # Convert to lowercase
+    text = ''.join([char for char in text if char not in string.punctuation])  # Remove punctuation
+    tokens = word_tokenize(text)  # Tokenize the text
+    tokens = [word for word in tokens if word not in stop_words]  # Remove stopwords
+    tokens = [lemmatizer.lemmatize(word) for word in tokens]  # Lemmatization
+    return ' '.join(tokens)  # Join tokens back into string
 
-    # Remove punctuation and special characters
-    text = re.sub(f"[{string.punctuation}]", "", text)
+# Apply preprocessing
+dataset["text"] = dataset["text"].astype(str)
+dataset["text"] = dataset["text"].apply(preprocess_text)
 
-    # Remove extra whitespaces
-    text = re.sub(r'\s+', ' ', text).strip()
+# Vectorize the text data
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(dataset["text"])
+y = dataset['label']
 
-    # Additional preprocessing steps (e.g., stopword removal) can be added here
+# Train the model
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = LogisticRegression()
+model.fit(X_train, y_train)
 
-    return text
+# Test accuracy
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+def make_prediction(model, vectorizer, text):
+    processed_text = preprocess_text(text)
+    text_vector = vectorizer.transform([processed_text])
+    prediction = model.predict(text_vector)
+    return prediction[0]
+
+# Define routes for Flask
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get the input data (text) from the POST request
-    data = request.get_json()
-
-    # Check if text is in the input data
-    if 'text' not in data:
-        return jsonify({"error": "No text provided"}), 400
-
-    text = data['text']
-
-    # Preprocess the input text
-    cleaned_text = preprocess_text(text)
-
-    # Use the pipeline to classify the preprocessed text
-    result = pipe(cleaned_text)
-
-    # Return the prediction result as JSON
-    return jsonify(result)
+    news_input = request.form['news_input']
+    prediction = make_prediction(model, vectorizer, news_input)
+    return jsonify({"prediction": "Fake" if prediction == 0 else "Real"})
 
 if __name__ == '__main__':
     app.run(debug=True)
