@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Details</title>
+    <style>
+        /* Base styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Header styling */
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #2980b9;
+            color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        /* Account details container */
+        .account-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .account-container h2 {
+            color: #2980b9;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .account-container p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        /* Styling for input fields */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .input-group input {
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .input-group label {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #2980b9;
+        }
+
+        /* Button styling */
+        .account-container button {
+            padding: 12px 20px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .account-container button:hover {
+            background-color: #3498db;
+        }
+
+        .account-container button:active {
+            transform: scale(0.95);
+        }
+
+        /* Back Button styling */
+        #back-btn {
+            padding: 12px 20px;
+            background-color: #bdc3c7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        #back-btn:hover {
+            background-color: #95a5a6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .account-container {
+                padding: 30px;
+                margin: 20px;
+            }
+
+            .account-container h2 {
+                font-size: 1.6rem;
+            }
+
+            .input-group input {
+                font-size: 1rem;
+            }
+
+            .account-container button {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div id="header">
+        <h1>Account Details</h1>
+    </div>
+
+    <!-- Account Details Section -->
+    <div class="account-container">
+        <h2>Your Account</h2>
+
+        <!-- Display User Information -->
+        <div class="input-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" value="John Doe" readonly>
+        </div>
+        <div class="input-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" value="john.doe@example.com" readonly>
+        </div>
+
+        <!-- Change Details Button -->
+        <button onclick="toggleEdit()">Change Details</button>
+
+        <!-- Change Details Form (hidden initially) -->
+        <div id="change-details" style="display:none;">
+            <div class="input-group">
+                <label for="new-name">New Name</label>
+                <input type="text" id="new-name" placeholder="Enter new name">
+            </div>
+            <div class="input-group">
+                <label for="new-email">New Email</label>
+                <input type="email" id="new-email" placeholder="Enter new email">
+            </div>
+            <button onclick="saveChanges()">Save Changes</button>
+        </div>
+
+        <!-- Back Button -->
+        <button id="back-btn" onclick="">log out</button>
+    </div>
+
+    <script>
+        // Toggle Change Details Form
+        function toggleEdit() {
+            var details = document.getElementById("change-details");
+            details.style.display = details.style.display === "none" ? "block" : "none";
+        }
+
+        // Save changes (simulating with alert)
+        function saveChanges() {
+            var newName = document.getElementById("new-name").value;
+            var newEmail = document.getElementById("new-email").value;
+
+            if (newName && newEmail) {
+                alert("Changes Saved: " + newName + ", " + newEmail);
+                // Update the values in the account page after saving
+                document.getElementById("name").value = newName;
+                document.getElementById("email").value = newEmail;
+
+                // Hide the Change Details form
+                document.getElementById("change-details").style.display = "none";
+            } else {
+                alert("Please fill in both fields.");
+            }
+        }
+
+        // Back Button Function to return to the main page
+        function goBack() {
+            window.location.href = "index.html";  // Replace with the correct main page file name
+        }
+    </script>
+
+</body>
+</html>
